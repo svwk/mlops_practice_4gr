@@ -63,7 +63,7 @@ do
     echo "Executing $python_script"
     chmod ugo+x "$full_path"
 
-    if  python3 "$full_path" -d "$data_dir" -t "dataset_name"
+    if  python3 "$full_path" -d "$data_dir" -t "$dataset_name"
     then
       echo   "$python_script is done"
     else

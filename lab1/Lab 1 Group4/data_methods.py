@@ -2,13 +2,24 @@
 Методы работы с данными
 """
 import pickle
+
 import numpy as np
 import pandas as pd
 from sklearn.datasets import make_moons, make_circles, make_classification
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 
+import message_constants as mc
 from detail_params import l2_nom, l1_nom, godn, brak, godn_name, brak_name
+
+
+def print_error(ex, file_path):
+    """
+    Вывод сообщения об ошибке сохранения файла
+    :param ex: объект исключения
+    :param file_path:  полный путь файла
+    """
+    print(f"{mc.FILE_SAVE_ERROR} {file_path}: {ex.args}")
 
 
 def make_data(count, method='line', noises=0.15, random_state=42):
@@ -93,28 +104,37 @@ def devide_save(x, y, data_cls, data_path, name, random_state=42):
 
     x_train, x_test, y_train, y_test, z_train, z_test = train_test_split(x, y, data_cls, test_size=0.3,
                                                                          random_state=random_state)
+
+    df_train = pd.DataFrame({'l1': x_train, 'l2': y_train, 'status': z_train})
+    df_test = pd.DataFrame({'l1': x_test, 'l2': y_test, 'status': z_test})
+
     file_path = ""
     try:
-        df_train = pd.DataFrame({'l1': x_train, 'l2': y_train, 'status': z_train})
         file_path = data_path + 'train/' + name + '_source.csv'
         df_train.to_csv(file_path, index=False)
 
-        df_test = pd.DataFrame({'l1': x_test, 'l2': y_test, 'status': z_test})
-        file_path = data_path + 'test/' + name + '_source.csv'
-        df_train.to_csv(file_path, index=False)
-
-        return df_train, df_test
-
-    except:
-        print(f"Ошибка сохранения файла {file_path}")
+    except Exception as ex:
+        print_error(ex, file_path)
         return None
 
+    try:
+        file_path = data_path + 'test/' + name + '_source.csv'
+        df_test.to_csv(file_path, index=False)
+        print(f"{mc.SOURCE_SAVED}: {file_path}")
 
-def transforms(file_name, scaler):
+    except Exception as ex:
+        print_error(ex, file_path)
+        return None
+
+    return df_train, df_test
+
+
+def transforms(file_name, scaler, to_fit_scaler):
     """
     Предобработка данных и сохранение их в новый файл
     :param file_name: полный путь и имя обрабатываемого файла
     :param scaler: объект StandardScaler, выполняющий стандартизацию
+    :param to_fit_scaler: флаг нужно ли обучать об]ект scaler
     """
 
     df = pd.read_csv(file_name, sep=',')
@@ -131,8 +151,11 @@ def transforms(file_name, scaler):
     df['y'] = df['l1'] - l1_nom
 
     num_columns = ['x', 'y']
-    standard = scaler.fit(df[num_columns])
-    scaled = standard.transform(df[num_columns])
+
+    if to_fit_scaler:
+        scaler.fit(df[num_columns])
+
+    scaled = scaler.transform(df[num_columns])
 
     df_standard = pd.DataFrame(scaled, columns=num_columns)
     df_standard['z'] = df['status'].apply(lambda x: godn if x == godn_name else brak)
@@ -142,31 +165,35 @@ def transforms(file_name, scaler):
         df_standard.to_csv(file_name, index=False)
 
         post_count = df.shape[0]
-        print(f"Количество строк до обработки: {pre_count}")
-        print(f"Количество строк после обработки: {post_count}")
+        print(f"{mc.STAND_SAVED}: {file_name}")
+        print(f"{mc.STRING_COUNT_PRE}: {pre_count}")
+        print(f"{mc.STRING_COUNT_POST}: {post_count}")
 
         return df_standard
 
-    except:
-        print(f"Ошибка сохранения файла {file_name}")
+    except Exception as ex:
+        print_error(ex, file_name)
         return None
 
-#%% Загрузим, обучим и сохраним модель
-def train_and_save_model(X_train, y_train, file_path, file_name):
+
+# %% Загрузим, обучим и сохраним модель
+def train_and_save_model(x_train, y_train, file_path, file_name):
     """
-    Загрузка, обучение и сохранение модели
-    :param X_train: x, y params of dataset
+    Обучение и сохранение модели
+    :param x_train: x, y params of dataset
     :param y_train: target
     :param file_path: path to content folder
     :param file_name: name of opened file
     """
-    model = LogisticRegression(max_iter=100_000).fit(X_train, y_train)
+    model = LogisticRegression(max_iter=100_000).fit(x_train, y_train)
     file_name = file_name.replace("_stand.csv", "_model.pkl")
     file_path = file_path + file_name
+
     try:
         pickle.dump(model, open(file_path, 'wb'))
-        print(f"Model succesfully generated {file_path}")
-        return  model
-    except Exception as inst:
-        print(f"Ошибка сохранения файла {file_name} {inst.args}")
+        print(f"{mc.MODEL_SAVED}: {file_path}")
+        return model
+
+    except Exception as ex:
+        print_error(ex, file_name)
         return None
