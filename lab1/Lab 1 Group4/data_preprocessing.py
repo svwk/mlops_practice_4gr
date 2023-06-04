@@ -2,11 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 # %% Импорт
-import sys
 import argparse
 import os
+import sys
+import joblib
 from sklearn.preprocessing import StandardScaler
 
+import message_constants as mc
 from data_methods import transforms
 from plot_data import plot_data
 
@@ -33,31 +35,32 @@ if not file_path.endswith("/"):
 if (not os.path.isdir(file_path)) or \
         (not os.path.isdir(file_path + 'train/')) or \
         (not os.path.isdir(file_path + 'test/')):
-    print("There is no such path")
+    print(mc.NO_PATH)
     sys.exit(1)
 
 show_plots = False
 
-scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
+for filename in os.listdir(file_path + "train/"):
+    if filename.endswith("_source.csv"):
+        full_filename = f"{file_path}train/{filename}"
+        scaler_filename = f"{file_path}{filename.replace('_source.csv', '_scaler.pkl')}"
+        scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
+        dataset_data = transforms(full_filename, scaler, True)
+        if dataset_data is None:
+            sys.exit(3)
+        joblib.dump(scaler, scaler_filename)
+
+        if show_plots:
+            plot_data(dataset_data, dataset_name + "_train")
 
 for filename in os.listdir(file_path + "test/"):
     if filename.endswith("_source.csv"):
         full_filename = f"{file_path}test/{filename}"
-        dataset_data = transforms(full_filename, scaler)
+        scaler_filename = f"{file_path}{filename.replace('_source.csv', '_scaler.pkl')}"
+        scaler = joblib.load(scaler_filename)
+        dataset_data = transforms(full_filename, scaler, False)
         if dataset_data is None:
-            sys.exit(2)
+            sys.exit(4)
 
-        # %% Вывод графиков
         if show_plots:
             plot_data(dataset_data, dataset_name + "_test")
-
-for filename in os.listdir(file_path + "train/"):
-    if filename.endswith("_source.csv"):
-        full_filename = f"{file_path}train/{filename}"
-        dataset_data = transforms(full_filename, scaler)
-        if dataset_data is None:
-            sys.exit(2)
-
-        # %% Вывод графиков
-        if show_plots:
-            plot_data(dataset_data, dataset_name + "_train")
