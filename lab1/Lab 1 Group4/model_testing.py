@@ -7,6 +7,8 @@ import argparse
 import os
 import sys
 
+import message_constants as mc
+
 # %% Задание пути для сохранения файлов
 file_path = os.getcwd()
 dataset_name = 'moons'
@@ -45,11 +47,16 @@ for filename in os.listdir(file_path + "test/"):
             with open(model_file_path, 'rb') as model_storage:
                 model = pickle.load(model_storage)
 
-            accuracy = model.score(X_test.values, df_test['z'].values)
-            print(f'Model test accuracy is: {accuracy:.3f}')
+            if model is not None:
+                accuracy = model.score(X_test.values, df_test['z'].values)
+                print(f'{mc.MODEL_TEST_ACCURACY}: {accuracy:.3f}')
+            else:
+                print(mc.MODEL_READ_ERROR)
+                sys.exit(6)
+
         except Exception as inst:
-            print(f"Ошибка чтения модели {model_filename} {inst.args}")
-            sys.exit(1)
+            print(f"{mc.MODEL_READ_ERROR} {model_filename} {inst.args}")
+            sys.exit(7)
 
 
 

@@ -1,28 +1,29 @@
 #!/bin/bash
 
+# Каталог для скриптов python
 script_dir=$1
+
+# Каталог для данных и модели
 data_dir=$2
+
+# Название используемого датасета
 dataset_name=$3
 
-# Директории для данных
-if  [ -z  "${data_dir}" ]
-then
-#   data_dir="$HOME/content$(date +%Y%m%d%H%M%S)"
-#   data_dir="$(pwd)/content$(date +%Y%m%d%H%M%S)"
-   data_dir="$(pwd)/content"
+if  [ -z  "${data_dir}" ]; then
+  data_dir="$(pwd)/content"
 fi
 
 if  [ -z  "${script_dir}" ]; then
   script_dir="$(pwd)"
 fi
 if [[ ! -d "$script_dir" && ! -L "$script_dir" ]] ; then
-    echo "Указанного каталога для скриптов не существует."
-    echo "Программа завершена."
+    echo "The specified script directory does not exist."
+    echo " The program is over."
     exit 3
 fi
 if [ !  -r "$script_dir" ] ; then
-  echo "Невозможно получить доступ к каталогу со скриптами."
-  echo "Программа завершена."
+  echo "The scripts directory cannot be accessed."
+  echo "The program is over."
   exit 4
 fi
 
@@ -35,8 +36,8 @@ mkdir -m ug+rw -p "$data_dir/test"
 mkdir -m ug+rw -p "$data_dir/train"
 
 if [[  ! -r "$data_dir" || ! -w "$data_dir" ]] ; then
-  echo "Невозможно получить доступ к каталогу данных."
-  echo "Программа завершена."
+  echo "The data directory cannot be accessed."
+  echo "The program is over."
   exit 2
 fi
 

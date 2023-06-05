@@ -156,6 +156,9 @@ def transforms(file_name, scaler, to_fit_scaler):
         scaler.fit(df[num_columns])
 
     scaled = scaler.transform(df[num_columns])
+    scaled = to_polynom(scaled, order=3)
+
+    num_columns = np.hstack([num_columns, ['x2', 'y2', 'x3', 'y3']])
 
     df_standard = pd.DataFrame(scaled, columns=num_columns)
     df_standard['z'] = df['status'].apply(lambda x: godn if x == godn_name else brak)
@@ -197,3 +200,16 @@ def train_and_save_model(x_train, y_train, file_path, file_name):
     except Exception as ex:
         print_error(ex, file_name)
         return None
+
+
+def to_polynom(x, order=2):
+    """
+    Преобразование к полиному
+    :param x: исходные данные
+    :param order: степень полинома
+    """
+    order_range = range(2, order + 1, 1)
+    out = np.copy(x)
+    for i in order_range:
+        out = np.hstack([out, np.power(x, i)])
+    return out
