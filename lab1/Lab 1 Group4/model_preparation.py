@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-"""Импортируем нужные библиотеки"""
+# %% Импортируем нужные библиотеки
 import argparse
 import os
 import sys
 import pandas as pd
 
+import message_constants as mc
 from data_methods import train_and_save_model
 
-
-#Задаем путь для сохранения модели, а так же пути для чтения датасета
+# %% Задаем путь для сохранения модели, а так же пути для чтения датасета
 file_path = os.getcwd()
 dataset_name = 'moons'
 
@@ -29,11 +29,11 @@ if __name__ == "__main__":
 if not file_path.endswith("/"):
     file_path = f"{file_path}/"
 
-#%% Если пути не существует, скрипт прерывает свою работу
+# %% Если пути не существует, скрипт прерывает свою работу
 if (not os.path.isdir(file_path)) or \
         (not os.path.isdir(file_path + 'train/')) or \
         (not os.path.isdir(file_path + 'test/')):
-    print("There is no such file")
+    print(mc.NO_PATH)
     sys.exit(1)
 
 for filename in os.listdir(file_path + "train/"):
@@ -46,4 +46,4 @@ for filename in os.listdir(file_path + "train/"):
         model = train_and_save_model(X_train, y_train, file_path, filename)
 
         if model is None:
-            sys.exit(3)
+            sys.exit(5)

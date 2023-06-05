@@ -6,8 +6,8 @@ import argparse
 import os
 import sys
 
+import message_constants as mc
 from data_methods import make_data, devide_save
-
 
 # %% Задание пути для сохранения файлов
 file_path = os.getcwd()
@@ -26,13 +26,13 @@ if __name__ == "__main__":
         dataset_name = namespace.type
 
 if not file_path.endswith("/"):
-    file_path=f"{file_path}/"
+    file_path = f"{file_path}/"
 
-#%% Если пути не существует, скрипт прерывает свою работу
+# %% Если пути не существует, скрипт прерывает свою работу
 if (not os.path.isdir(file_path)) or \
         (not os.path.isdir(file_path + 'train/')) or \
         (not os.path.isdir(file_path + 'test/')):
-    print("There is no such path")
+    print(mc.NO_PATH)
     sys.exit(1)
 
 # %% Генерация данных
@@ -44,7 +44,7 @@ count = 15000
 seed = 38
 
 dataset_data = devide_save(*make_data(count, method='moons',
-                                    noises=0.15, random_state=seed), file_path, dataset_name)
+                                      noises=0.15, random_state=seed), file_path, dataset_name)
 
 if dataset_data is None:
     sys.exit(2)
