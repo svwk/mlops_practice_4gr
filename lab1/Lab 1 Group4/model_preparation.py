@@ -41,7 +41,7 @@ for filename in os.listdir(file_path + "train/"):
         full_filename = f"{file_path}train/{filename}"
         data_train = pd.read_csv(full_filename)
 
-        X_train = data_train[['x', 'y']].values
+        X_train = data_train[['x', 'y', 'x2', 'y2', 'x3', 'y3']].values
         y_train = data_train['z'].values
         model = train_and_save_model(X_train, y_train, file_path, filename)
 
